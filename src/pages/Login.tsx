@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 function Login() {
-  const [userEmail, setUserEmail] = useState("");
+  const [userEmail, setUserEmail] = useState<string>("");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -23,12 +23,13 @@ function Login() {
       alert("Please enter a valid email address.");
     }
   };
+
   return (
     <div>
       <div className="register">
         <div className="upper">
           <h1>🔤YouForm</h1>
-          <div className="new-acount">
+          <div className="new-account">
             <h3>Create a new account</h3>
             <p>
               Or{" "}

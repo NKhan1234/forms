@@ -1,25 +1,30 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, ChangeEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
+
+interface Form {
+  id: number;
+  name: string;
+}
 
 function Dashboard() {
   const navigate = useNavigate();
-  const [show, setShow] = useState(false);
-  const [formShow, setFormShow] = useState(false);
-  const [forms, setForms] = useState([]);
-  const [newFormName, setNewFormName] = useState("");
-  const [formData, setFormData] = useState({});
+  const [show, setShow] = useState<boolean>(false);
+  const [formShow, setFormShow] = useState<boolean>(false);
+  const [forms, setForms] = useState<Form[]>([]);
+  const [newFormName, setNewFormName] = useState<string>("");
+  const [formData, setFormData] = useState<{ newFormName?: string }>({});
 
-  // Retrieve email from localStorage
   const email = localStorage.getItem("userEmail") || "Not Logged In";
 
-  // Load forms from localStorage on component mount
   useEffect(() => {
-    const savedForms = JSON.parse(localStorage.getItem(`forms_${email}`)) || [];
+    const savedForms = JSON.parse(
+      localStorage.getItem(`forms_${email}`) || "[]"
+    ) as Form[];
     setForms(savedForms);
 
-    // Load form data if available
-    const savedFormData =
-      JSON.parse(localStorage.getItem(`formData_${email}`)) || {};
+    const savedFormData = JSON.parse(
+      localStorage.getItem(`formData_${email}`) || "{}"
+    ) as { newFormName?: string };
     setFormData(savedFormData);
   }, [email]);
 
@@ -36,38 +41,35 @@ function Dashboard() {
   };
 
   const handleSignOut = () => {
-    // Clear email from localStorage
     localStorage.removeItem("userEmail");
     navigate("/register");
   };
 
-  const handleFormNameChange = (e) => {
+  const handleFormNameChange = (e: ChangeEvent<HTMLInputElement>) => {
     setNewFormName(e.target.value);
-    setFormData({ ...formData, newFormName: e.target.value });
-    localStorage.setItem(
-      `formData_${email}`,
-      JSON.stringify({ ...formData, newFormName: e.target.value })
-    );
+    const updatedFormData = { ...formData, newFormName: e.target.value };
+    setFormData(updatedFormData);
+    localStorage.setItem(`formData_${email}`, JSON.stringify(updatedFormData));
   };
 
   const handleCreateForm = () => {
-    const newFormId = new Date().getTime(); // Use timestamp as a simple unique ID
-    const newForm = {
+    const newFormId = new Date().getTime();
+    const newForm: Form = {
       id: newFormId,
-      name: newFormName || `My Form`, // Default name if not provided
+      name: newFormName || "My Form",
     };
 
     const updatedForms = [...forms, newForm];
     setForms(updatedForms);
     localStorage.setItem(`forms_${email}`, JSON.stringify(updatedForms));
 
-    setNewFormName(""); // Clear the input field
-    setFormData({}); // Clear the formData state
-    localStorage.removeItem(`formData_${email}`); // Remove the saved form data
-    setFormShow(false); // Hide the form creation UI
+    setNewFormName("");
+    setFormData({});
+    localStorage.removeItem(`formData_${email}`);
+    setFormShow(false);
   };
 
-  const handleDeleteForm = (formId) => {
+  const handleDeleteForm = (formId: number) => {
     const updatedForms = forms.filter((form) => form.id !== formId);
     setForms(updatedForms);
     localStorage.setItem(`forms_${email}`, JSON.stringify(updatedForms));
